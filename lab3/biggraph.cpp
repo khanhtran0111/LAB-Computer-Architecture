@@ -15,7 +15,7 @@
 #include <iomanip>
 #include <omp.h>
 #include <chrono>
-
+#include <math.h>
 #include "CycleTimer.h"
 
 #define OUTGOING 0
@@ -100,7 +100,7 @@ vector<int> Distances;			 // for all nodes
 uint32_t nodeNum = 0, edgeNum = 0;
 bool diGraph = false, verbose = false;
 uint32_t testNum = 1;
-uint32_t threadNum = 8;
+uint32_t threadNum = omp_get_max_threads();
 
 static inline uint32_t GetID(uint32_t v) { return v >> 2; }
 static inline uint32_t GetState(uint32_t v) { return v & MASK; }
@@ -227,10 +227,11 @@ void Build(char *filename)
 // Compute in serial the Closeness Centrality for all nodes
 void computeCCserial()
 {
+	nodeNum = 10000;
 	// vector<tuple<uint32_t, int>> Distances(nodeNum);
 	vector<double> CC(nodeNum);
 
-	for (uint32_t v = 0; v < nodeNum; v++)
+	for (uint32_t v = 0; v < nodeNum ; v++)
 	{
 		uint32_t threadID = 0;
 		// travel SSSP from v
@@ -280,10 +281,10 @@ void computeCCserial()
 // Compute in parallel the Closeness Centrality for all nodes
 void computeCCparallel()
 {
-    auto start = chrono::high_resolution_clock::now();
+	nodeNum = 10000;
+    omp_set_num_threads(threadNum);
     
     vector<double> CC(nodeNum, 0.0);
-    
     #pragma omp parallel for
     for (uint32_t v = 0; v < nodeNum; v++)
     {
@@ -329,10 +330,6 @@ void computeCCparallel()
             CC[v] = (double)(nodeNum - 1) / distance;
         }
     }
-    
-    auto end = chrono::high_resolution_clock::now();
-    auto duration = chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    cout << "Time: " << duration.count() << " milliseconds" << endl;
 
     if (verbose)
     {
@@ -359,7 +356,7 @@ int main(int argc, char *argv[])
 	auto method = std::string(argv[3]);
 	if (argc == 5)
 		verbose = atoi(argv[4]);
-	auto ccStart = chrono::high_resolution_clock::now();
+	auto startTime = chrono::high_resolution_clock::now();
 	if (method == "CC")
 	{
 		cout << "Calculating in parallel the Closeness Centrality of all nodes in graph ..." << endl;
@@ -370,9 +367,9 @@ int main(int argc, char *argv[])
 		cout << "Calculating in serial the Closeness Centrality of all nodes in graph ..." << endl;
 		computeCCserial();
 	}
-	auto ccEnd = chrono::high_resolution_clock::now();
-	auto ccDuration = chrono::duration_cast<std::chrono::milliseconds>(ccEnd - ccStart);
-	cout << "Closeness Centrality calculation time: " << ccDuration.count() << " milliseconds" << endl;
+	auto endTime = chrono::high_resolution_clock::now();
+	auto executionTime = chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+	cout << "Closeness Centrality calculation time: " << executionTime.count() << " milliseconds" << endl;
 	cout << "Done!" << endl;
 	return 0;
 }
