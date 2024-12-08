@@ -1,12 +1,17 @@
 # Computer Architecture
 ---
 
-Student: Tran Gia Khanh
-Id: 23021599
+Student: **Tran Gia Khanh**
+
+Id: **23021599**
+
 VNU - UET
+
 Course: **INT 2212**
-Teacher: Nguyễn Ngọc Hoá
-Assistant lecturer: Nguyễn Đức Anh
+
+Teacher: **Nguyễn Ngọc Hoá**
+
+Assistant lecturer: **Nguyễn Đức Anh**
 
 ---
 
